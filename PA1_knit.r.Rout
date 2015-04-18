@@ -1,0 +1,72 @@
+
+R version 3.1.2 (2014-10-31) -- "Pumpkin Helmet"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> library("knitr");
+> 
+> knit2html("PA1_template.Rmd");
+
+
+processing file: PA1_template.Rmd
+  |                                                                         |                                                                 |   0%  |                                                                         |....                                                             |   7%
+  ordinary text without R code
+
+  |                                                                         |.........                                                        |  13%
+label: unnamed-chunk-1
+  |                                                                         |.............                                                    |  20%
+  ordinary text without R code
+
+  |                                                                         |.................                                                |  27%
+label: unnamed-chunk-2
+  |                                                                         |......................                                           |  33%
+   inline R code fragments
+
+  |                                                                         |..........................                                       |  40%
+label: unnamed-chunk-3
+  |                                                                         |..............................                                   |  47%
+   inline R code fragments
+
+  |                                                                         |...................................                              |  53%
+label: unnamed-chunk-4
+  |                                                                         |.......................................                          |  60%
+   inline R code fragments
+
+  |                                                                         |...........................................                      |  67%
+label: unnamed-chunk-5
+  |                                                                         |................................................                 |  73%
+  ordinary text without R code
+
+  |                                                                         |....................................................             |  80%
+label: unnamed-chunk-6
+  |                                                                         |........................................................         |  87%
+   inline R code fragments
+
+  |                                                                         |.............................................................    |  93%
+label: unnamed-chunk-7
+  |                                                                         |.................................................................| 100%
+  ordinary text without R code
+
+
+output file: PA1_template.md
+
+> 
+> proc.time()
+   user  system elapsed 
+  1.441   0.101   3.639 

@@ -19,42 +19,110 @@ activityDaily <- data.frame(
 ## What is mean total number of steps taken per day?
 
 ```{r}
-stepsPerDay <- tapply(activity$steps, activity$date, function(s) { return(sum(s, na.rm = TRUE)); });
-meanStepsPerDay <- mean(stepsPerDay);
-medianStepsPerDay <- median(stepsPerDay);
-hist(stepsPerDay, main = "number of steps per day");
-rug(stepsPerDay);
-abline(v = meanStepsPerDay, col = "blue");
-abline(v = medianStepsPerDay, col = "green");
-legend("topright", legend = c("mean", "median"), col = c("blue", "green"), lwd = 1);
+dailyStepsHistogram <- function(activity)
+{
+  stepsPerDay <- tapply(activity$steps, activity$date, function(s) { return(sum(s, na.rm = TRUE)); });
+  meanStepsPerDay <- mean(stepsPerDay);
+  medianStepsPerDay <- median(stepsPerDay);
+  hist(stepsPerDay, main = "number of steps per day");
+  rug(stepsPerDay);
+  abline(v = meanStepsPerDay, col = "blue");
+  abline(v = medianStepsPerDay, col = "green");
+  legend("topright", legend = c("mean", "median"), col = c("blue", "green"), lwd = 1);
+  return(invisible(list(stepsPerDay = stepsPerDay, meanStepsPerDay = meanStepsPerDay, medianStepsPerDay = medianStepsPerDay)));
+}
+dailyStats <- dailyStepsHistogram(activity);
 ```
 
-Measurements were recorded during `r length(stepsPerDay)` days.
-The mean total number of steps is `r meanStepsPerDay`, the median is `r medianStepsPerDay`.
-
+Measurements were recorded during `r length(dailyStats$stepsPerDay)` days.
+The mean total number of steps is `r dailyStats$meanStepsPerDay`,
+the median is `r dailyStats$medianStepsPerDay`.
 
 
 ## What is the average daily activity pattern?
 
 ```{r}
-stepsPerInterval <- tapply(activity$steps, activity$interval, function(s) { return(mean(s, na.rm = TRUE)); });
-maxStepsPerInterval <- max(stepsPerInterval);
-argmaxStepsPerInterval <- names(stepsPerInterval)[which(stepsPerInterval == maxStepsPerInterval)];
+intervalStepsPlot <- function(activity, ...)
+{
+  stepsPerInterval <- tapply(activity$steps, activity$interval, function(s) { return(mean(s, na.rm = TRUE)); });
+  stepsPerInterval <- stepsPerInterval[order(as.integer(names(stepsPerInterval)))];
+  maxStepsPerInterval <- max(stepsPerInterval);
+  argmaxStepsPerInterval <- names(stepsPerInterval)[which(stepsPerInterval == maxStepsPerInterval)];
+  plot(as.integer(names(stepsPerInterval)), stepsPerInterval, type = "l", ...);
+  points(as.integer(argmaxStepsPerInterval), maxStepsPerInterval, col = "red");
+  return(invisible(list(stepsPerInterval = stepsPerInterval, maxStepsPerInterval = maxStepsPerInterval, argmaxStepsPerInterval = argmaxStepsPerInterval)));
+}
+intervalStepsStats <- intervalStepsPlot(activity);
 ```
 
 The largest average number of steps in an interval is
-`r maxStepsPerInterval` and occurs in interval
-`r argmaxStepsPerInterval`.
+`r intervalStepsStats$maxStepsPerInterval` and occurs in interval
+`r intervalStepsStats$argmaxStepsPerInterval`.
+The plot below shows the average number of
+steps as a function of the time interval, with the maximum highlighted
+by a red circle.
 
-time series 
-
-```{r}
-plot(stepsPerInterval, type = "l");
-points(which(names(stepsPerInterval) == argmaxStepsPerInterval), maxStepsPerInterval, col = "red");
-```
 
 ## Imputing missing values
 
+```{r}
+apply(activity, 2, function(x) { return(sum(is.na(x))); });
+```
 
+The above summary shows that there are only missing values (numbering
+`r sum(is.na(activity$steps))`) in the `steps` column, the `date` and
+`interval` columns (which presumably are independent variables) are
+complete.
+
+The following code sets up `activityImputed` as a data frame in which
+the missing values are "filled in" by the mean activity in that
+interval (taken from the `stepsPerInterval` object created
+previously).
+
+```{r}
+indexStepsNA <- which(is.na(activity$steps));
+stepsImputed <- activity$steps;
+stepsImputed[indexStepsNA] <- stepsPerInterval[as.character(activity$interval[indexStepsNA])];
+activityImputed <- activity;
+activityImputed$steps <- stepsImputed;
+```
+
+Using the previously `dailyStepsHistogram` function, the histogram and stats are as follows:
+```{r}
+dailyStatsImputed <- dailyStepsHistogram(activityImputed);
+```
+
+After this imputation, 
+the mean total number of steps is `r dailyStatsImputed$meanStepsPerDay`,
+the median is `r dailyStatsImputed$medianStepsPerDay`
+(or here's the same with controlling the number formatting using `sprintf`,
+the mean total number of steps is `r sprintf("%15.7f", dailyStatsImputed$meanStepsPerDay)`,
+the median is `r sprintf("%15.7f", dailyStatsImputed$medianStepsPerDay)`).
+
+So the mean has gone up, and the median is now the same as the mean. A
+possible explanation for the increased mean is that values are more
+likely to be missing when few steps are taken, e.g. the monitoring
+device may be more likely to be switched off at times of low activity.
+After setting a considerable number of values to the mean of the
+non-missing values, it is not surprising that the median takes that
+value as well, so the median is not really useful after this
+imputation anymore.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+The following plots series of mean number of steps, separated by workday and weekend days.
+
+```{r}
+dayCat <- as.factor(ifelse(weekdays(as.Date(activity$date)) %in% c("Saturday", "Sunday"), "weekend", "workday"));
+activityByDayCat <- by(activity, dayCat, function(x) { return(x); });
+par(mfrow = c(2, 1));
+intervalStepsPlot(activityByDayCat$workday, main = "workday", ylim = c(0, 250));
+intervalStepsPlot(activityByDayCat$weekend, main = "weekday", ylim = c(0, 250));
+```
+
+My first impression is that there's a more concentrated spike of
+activity on workday mornings, followed by lower levels of activity
+during the rest of the day (perhaps due to working in an office / at a
+computer), while the peak of activity occurs later during weekends
+(very sensibly having a lie-in?) and higher activity levels throughout
+the day.
