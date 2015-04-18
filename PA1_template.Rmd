@@ -8,15 +8,50 @@ output:
 
 ## Loading and preprocessing the data
 
-
+```{r}
+activity <- read.csv("activity.csv");
+summary(activity);
+activityDaily <- data.frame(
+  steps = tapply(activity$steps, activity$date, function(s) { return(sum(s, na.rm = TRUE)); }),
+  numNAs = tapply(activity$steps, activity$date, function(s) { return(sum(is.na(s))); }));
+```
 
 ## What is mean total number of steps taken per day?
+
+```{r}
+stepsPerDay <- tapply(activity$steps, activity$date, function(s) { return(sum(s, na.rm = TRUE)); });
+meanStepsPerDay <- mean(stepsPerDay);
+medianStepsPerDay <- median(stepsPerDay);
+hist(stepsPerDay, main = "number of steps per day");
+rug(stepsPerDay);
+abline(v = meanStepsPerDay, col = "blue");
+abline(v = medianStepsPerDay, col = "green");
+legend("topright", legend = c("mean", "median"), col = c("blue", "green"), lwd = 1);
+```
+
+Measurements were recorded during `r length(stepsPerDay)` days.
+The mean total number of steps is `r meanStepsPerDay`, the median is `r medianStepsPerDay`.
 
 
 
 ## What is the average daily activity pattern?
 
+```{r}
+stepsPerInterval <- tapply(activity$steps, activity$interval, function(s) { return(mean(s, na.rm = TRUE)); });
+maxStepsPerInterval <- max(stepsPerInterval);
+argmaxStepsPerInterval <- names(stepsPerInterval)[which(stepsPerInterval == maxStepsPerInterval)];
+```
 
+The largest average number of steps in an interval is
+`r maxStepsPerInterval` and occurs in interval
+`r argmaxStepsPerInterval`.
+
+time series 
+
+```{r}
+plot(stepsPerInterval, type = "l");
+points(which(names(stepsPerInterval) == argmaxStepsPerInterval), maxStepsPerInterval, col = "red");
+```
 
 ## Imputing missing values
 
